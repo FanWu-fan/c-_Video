@@ -53,6 +53,19 @@ void change_stu4(const Student *const s) {
 	//s = &s2;//此时s不能被修改
 }
 
+enum MyEnum
+{
+	SPR,
+	SUM,
+	AUT
+};
+
+void test2() {
+	MyEnum s = SPR;//为了增加枚举类型的可读性。不能用值来赋值。
+
+}
+
+
 
 int main() {
 
