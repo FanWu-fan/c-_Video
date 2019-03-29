@@ -1,11 +1,11 @@
 #include<iostream>
 using namespace std;
 
-void test1()
+
+struct TypeA
 {
 
-
-}
+};
 
 int main()
 {
