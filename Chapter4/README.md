@@ -471,10 +471,147 @@ int main()
 	system("pause");
 }
 ```
+## 1.6 构造函数的初始化列表
+1. 在类中，成员变量为常量的，只能在初始化列表中进行初始化，不能赋值
+2. 在类中，成员变量为 对象时，只能在初始化列表中进行 对象的初始化，不能在 {}中初始化,如果在{}中使用，是为 “函数调用”
+
+```C++
+class ABC
+{
+public:
+	ABC(int a, int b, int c, int d ) : m_a(a), m_b(b), m_c(c), m_m(d)//常量成员只能通过初始化列表进行初始化，不能重新赋值
+	{
+		//this->m_m = d;
+	}
+private:
+	int m_a;
+	int m_b;
+	int m_c;
+	const int m_m;//常量
+};
+
+class B
+{
+public:
+	B(int b):a1(10),a2(100)//在初始化B的时候，通过初始化列表给内部对象a1，a2进行了初始化
+	{//类内部的对象初始化的顺序和对象定义的顺序一样，跟初始化列表中的顺序无关
+	//析构的顺序和对象定义的顺序相反
+		m_b = b;
+	}
+
+	B(int aa1, int aa2, int b) : a1(aa1), a2(aa2), m_b(b)//通过初始化列表不仅能够初始化成员对象，还可以初始化成员变量
+	{
+
+	}
+
+	void printB()
+	{
+		cout << "b= " << m_b << endl;
+		a1.printA();
+		a2.printA();
+	}
+
+	~B()
+	{
+		cout << "B= " <<m_b<<"调用了析构函数"<< endl;
+	}
+
+private:
+	int m_b;
+	A a1;
+	A a2;
+}; 
+```
+## 1.7 强化练习1
+```C++
+#include<iostream>
+using namespace std;
+
+class ABCD
+{
+public:
+	ABCD(int a, int b, int c)
+	{
+		_a = a;
+		_b = b;
+		_c = c;
+		cout << "ADBC() construct, a: " << _a << " b: " << _b << " c: " << _c << endl;
+	}
+	~ABCD()
+	{
+		cout << "~ADBC() construct, a: " << _a << " b: " << _b << " c: " << _c << endl;
+	}
+	int getA()
+	{
+		return _a;
+	}
+
+private:
+	int _a;
+	int _b;
+	int _c;
+};
+
+class MyE
+{
+public:
+	MyE():abcd1(1,2,3),abcd2(4,5,6),m(100)
+	{
+		cout << "MyD()" << endl;
+	}
+	~MyE()
+	{
+		cout << "~MtD()" << endl;
+	}
+	MyE(const MyE & obj) :abcd2(10, 11, 12), abcd1(7, 8, 9), m(100)// 初始化成员对象，与初始化顺序无关，只和定义的顺序有关
+	{
+		cout << "MyD(const MyE &obj)" << endl;
+	}
 
 
 
+public:
+	ABCD abcd1;
+	ABCD abcd2;
+	const int m;
+};
 
+int doThing(MyE mye1)//局部变量会 使用拷贝构造函数
+{
+	cout << "doThing() mye1.abc1.a: " << mye1.abcd1.getA() << endl;//由于拷贝函数的原因，这里不再输出1而是输出7
+	return 0;
+}
+int run()
+{
+	MyE mye;
+	doThing(mye);//这里会调用 类的拷贝函数
+	return 0;
+}
+
+int main()
+{
+	run();
+	system("pause");
+	return 0;
+}
+/*
+ADBC() construct, a: 1 b: 2 c: 3
+ADBC() construct, a: 4 b: 5 c: 6
+MyD()
+ADBC() construct, a: 7 b: 8 c: 9
+ADBC() construct, a: 10 b: 11 c: 12
+MyD(const MyE &obj)
+doThing() mye1.abc1.a: 7
+~MtD()
+~ADBC() construct, a: 10 b: 11 c: 12
+~ADBC() construct, a: 7 b: 8 c: 9
+~MtD()
+~ADBC() construct, a: 4 b: 5 c: 6
+~ADBC() construct, a: 1 b: 2 c: 3
+请按任意键继续. . .*/
+```
+
+## 1.8 强化练习2
 
 
 
