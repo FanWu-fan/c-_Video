@@ -612,7 +612,216 @@ doThing() mye1.abc1.a: 7
 ```
 
 ## 1.8 强化练习2
+```C++
+int run2()
+{
+	cout << "run2 start.." << endl;
+	ABCD(400, 500, 600);//临时对象的生命周期，匿名对象，匿名的临时对象编译器会立刻销毁，不等到正常的函数调用完毕
+	//产生以后就开始析构
+	cout << "run2 end" << endl;
+	return 0;
+}
 
+/*run2 start..
+ADBC() construct, a: 400 b: 500 c: 600
+~ADBC() construct, a: 400 b: 500 c: 600
+run2 end*/
+```
+
+```C++
+int run2()
+{
+	cout << "run2 start.." << endl;
+	//ABCD(400, 500, 600);//临时对象的生命周期，匿名对象，匿名的临时对象编译器会立刻销毁，不等到正常的函数调用完毕
+	//产生以后就开始析构
+	ABCD abcd = ABCD(100, 200, 300);//这里产生匿名对象以后，不是通过 拷贝构造函数来传递，而是直接取 别名。所以只有一次构造
+	//并且在run2结束以后才 进行 析构
+
+	cout << "run2 end" << endl;
+	return 0;
+
+/*
+run2 start..
+ADBC() construct, a: 100 b: 200 c: 300
+run2 end
+~ADBC() construct, a: 100 b: 200 c: 300
+请按任意键继续. . .
+*/
+}
+```
+## 1.9强化练习3
+```c++
+#include<iostream>
+using namespace std;
+
+//构造中调用构造是危险的行为
+
+class MyTest
+{
+public:
+	MyTest(int a, int b, int c)
+	{
+		_a = a;
+		_b = b;
+		_c = c;
+	}
+
+	MyTest(int a, int b)
+	{
+		_a = a;
+		_b = b;
+		//_c = 100;
+		MyTest(a, b, 100);//这个是匿名临时对象
+		//直接被释放了
+
+	}
+	~MyTest()
+	{
+		cout << "MyTest~:" << _a << ", " << _b << ", " << _c << endl;
+	}
+
+	int getC()
+	{
+		return this->_c;
+	}
+
+	void setC(int val)
+	{
+		_c = val;
+	}
+private:
+	int _a;
+	int _b;
+	int _c;
+
+};
+
+void test1()
+{
+	MyTest t1(1, 2);
+	cout << "c: " << t1.getC() << endl;
+}
+int main()
+{
+	test1();
+	system("pause");
+	return 0;
+}
+/*
+MyTest~:1, 2, 100 //首先匿名对象在被创建以后就会被析构
+c: -858993460
+MyTest~:1, 2, -858993460 //t1然后被析构
+请按任意键继续. . .
+*/
+```
+## 2.0 静态成员变量和成员函数
+静态static:
+* 修饰全局变量，代表这个全局变量不能被其他文件访问。
+* 修饰局部变量，会在静态区开辟一个空间，生命周期和整个程序一样。
+* 修饰函数，表示这个函数只能够在本文件中使用，其他文件不能使用。
+* 修饰类中的成员变量，由于空间开辟在全局上，必须在类外面，全局空间中进行初始化。 
+* 只有静态成员函数，才能不用与特定的对象相对，直接当成类的全局函数。静态函数成员函数的意义，在于管理静态数据成员，完成对静态数据成员的封装；静态成员函数只能访问静态数据成员，因为非静态成员函数，在调用时this指针被当作参数传进，而静态成员函数属于类，而不属于对象，没有this指针。
+```C++
+#include"pch.h"
+#include<iostream>
+using namespace std;
+
+class Student
+{
+public:
+	Student(int num, double score)
+	{
+		this->m_num = num;
+		this->m_score = score;
+		count++;
+		sum_score += score;
+	}
+	 static double getAvg()
+	{
+
+		return sum_score / count;
+	}
+
+private:
+	int m_num;
+	double m_score;
+	static int count;
+	static double sum_score;
+};
+
+int Student::count = 0;
+double Student::sum_score = 0;
+
+int main()
+{
+	Student s1(1, 100);
+	Student s2(2, 90);
+	Student s3(3, 80);
+	cout << "AVG : " << Student::getAvg() << endl;//只有静态成员函数，才能不用与特定的对象相对，直接当成类的全局函数
+	cout << "AVG : " << s2.getAvg() << endl;
+	return 0;
+
+}
+```
+## 2.1 static变量占用空间的大小
+实际上，static成员变量和函数都不占用空间，决定类空间大小的只有普通的成员变量。
+```c++
+#include "pch.h"
+#include <iostream>
+using namespace std;
+
+class c1
+{
+public:
+	int i;//4
+	int j;//4
+	int k;//4
+};//12
+
+
+class c2
+{
+public:
+	int i;
+	int j;
+	int k;
+	static int m;  //4
+public:
+	int getK() const { return k; }	//4
+	void setk(int val) { k = val; }//4
+};
+
+struct S1
+{
+	int i;
+	int j;
+	int k;
+	
+};//12
+
+struct S2
+{
+	int i;
+	int j;
+	int k;
+	static int m;
+};//12
+
+int main()
+{
+	cout << "c1: " << sizeof(c1) << endl;
+	cout << "c2 : " << sizeof(c2) << endl;
+	cout << "s1: " << sizeof(S1) << endl;
+	cout << "s2: " << sizeof(S2) << endl;
+
+}
+
+c1: 12
+c2 : 12
+s1: 12
+s2: 12
+
+```
 
 
 

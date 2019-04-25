@@ -62,9 +62,22 @@ int run()
 	return 0;
 }
 
+int run2()
+{
+	cout << "run2 start.." << endl;
+	//ABCD(400, 500, 600);//临时对象的生命周期，匿名对象，匿名的临时对象编译器会立刻销毁，不等到正常的函数调用完毕
+	//产生以后就开始析构
+	ABCD abcd = ABCD(100, 200, 300);//这里产生匿名对象以后，不是通过 拷贝构造函数来传递，而是直接取 别名。所以只有一次构造
+	//并且在run2结束以后才 进行 析构
+
+	cout << "run2 end" << endl;
+	return 0;
+}
+
 int main()
 {
-	run();
+	//run();
+	run2();
 	system("pause");
 	return 0;
 }
