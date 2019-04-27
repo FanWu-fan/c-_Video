@@ -49,14 +49,14 @@ void Test::print()
 //1.拷贝函数调用发生场景：
 void test1() {
 	Test t1(10,10);
-	Test t2(t1);
+	Test t2(t1);//调用了拷贝构造函数
 }
 
 //2.拷贝函数调用发生场景：
 void test2() {
 	Test t1(20, 20);
-	Test t2;
-	t2 = t1;
+	Test t2;//无参构造函数
+	t2 = t1;//赋值，不会调用有参构造函数
 	t2.print();
 }
 
@@ -66,11 +66,11 @@ void func(Test t)
 	cout << "func函数被调用" << endl;
 	t.print();
 	cout << "func函数调用完毕" << endl;
-}
+}//析构局部变量
 void test3()
 {
 	Test t1(30, 30);
-	func(t1);
+	func(t1);//会首先调用 拷贝构造函数，变为局部变量
 	cout << "函数3调用完毕" << endl;
 }
 
@@ -98,7 +98,7 @@ void test4()
 //场景5
 void test5()
 {
-	Test t1 = fun2();
+	Test t1 = fun2();//变量去接收一个 匿名的临时变量，不会使用拷贝，直接别名即可
 	cout << "函数5调用完毕" << endl;
 }
 
