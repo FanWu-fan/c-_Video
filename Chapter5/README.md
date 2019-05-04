@@ -637,5 +637,428 @@ int main()
 派生类成员的标识和访问
 |  |public|protected|private
 |:-----:|:----:|:---:|:---:|
-|公有继承(public)|
+|公有继承(public)|public|protected|不可见
+|保护继承(protected)|protected|protected|不可见
+|私有继承(private)|private|private|不可见
+
+```C++
+// 单继承.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
+//
+
+#include "pch.h"
+#include <iostream>
+using namespace std;
+
+#if 0
+
+
+
+class Base
+{
+public:
+	int pub;
+private:
+	int pri;
+protected:
+	int pro;
+};
+
+class PUB :public Base
+{
+public:
+	void func()
+	{
+		Base::pro = 10;
+		Base::pub = 100;
+		//pri=1000;不能继承私有属性
+	}
+};
+
+
+class PRO :protected Base
+{
+public:
+	void func1()
+	{
+		Base::pro = 10;
+		Base::pub = 100;
+
+	}
+};
+#endif // 0
+
+class A
+{
+private:
+	int a;
+protected:
+	int b;
+
+public:
+	int c;
+	A()
+	{
+		a = 0;
+		b = 0;
+		c = 0;
+	}
+	void set(int a, int b, int c)
+	{
+		this->a = a;
+		this->b = b;
+		this->c = c;
+	}
+
+};
+
+class B :public A
+{
+public:
+	void print()
+	{
+		//cout << "a = " << a;//这个不能访问
+		cout << "b=" << b << endl;//这个在外部不能直接访问 b
+		cout << "c=" << c << endl;
+	}
+};
+
+class C :protected A
+{
+public:
+	void print()
+	{
+		//cout << "a = " << a;//这个不能访问
+		cout << "b=" << b << endl;//这个在外部不能直接访问 b
+		cout << "c=" << c << endl;
+	}
+};
+
+class D :private A
+{
+public:
+	void print()
+	{
+		//cout << "a = " << a;//这个不能访问
+		cout << "b=" << b << endl;//这个在外部不能直接访问 b
+		cout << "c=" << c << endl;
+	}
+};
+
+int main()
+{
+
+	B	bb;
+	bb.print();
+	bb.c;
+
+	C  cc;
+	//cc.c; c不可访问
+	cc.print();
+
+	D dd;
+	//dd.c;c不可访问
+	dd.print();
+#if 0
+	Base b;
+	b.pub = 10;
+	//b.pro =100;
+	//b.pri =1000;
+
+	PUB p;
+	p.pub = 0;
+    std::cout << "Hello World!\n"; 
+
+	PRO pro;
+#endif // 0
+}
+```
+
+## 2.3 继承中的构造和析构
+1. 子类对象可以当作父类对象使用
+2. 子类对象可以直接赋值给父类对象
+3. 子类对象可以直接初始化父类对象
+4. 父类指针可以直接指向子类对象
+5. 父类引用可以直接引用子类对象	
+
+```C++
+#include "pch.h"
+#include <iostream>
+using namespace std;
+/*
+子类对象可以当作父类对象使用
+子类对象可以直接赋值给父类对象
+子类对象可以直接初始化父类对象
+父类指针可以直接指向子类对象
+父类引用可以直接引用子类对象
+*/
+
+class Parent
+{
+public:
+	void printP()
+	{
+		cout << "Parent::printP" << endl;
+	}
+};
+
+class Child :public Parent
+{
+public:
+	void printC()
+	{
+		cout << "Child::printc()" << endl;
+	}
+};
+int main()
+{
+	Child c;
+	c.printP();//子类对象可以当作父类对象使用
+
+	Parent p = c;//由于子类拥有全部父类的内存空间，子类能够保证父类初始化完整
+	//Child c2 = p;//父类不能完整的初始化 子类，子类的内存空间包含了 父类
+
+	//父类指针可以直接指向子类对象。
+	Parent *pp = &c;
+	pp->printP();
+	//Child *cc = &p;子类对象不能直接指向父类
+
+    std::cout << "Hello World!\n"; 
+}
+```
+* 子类是调用父类的 构造函数 和 析构函数来完成 构造和析构。
+```C++
+class Parent
+{
+public:
+	void printP()
+	{
+		cout << "Parent::printP" << endl;
+	}
+	Parent(int a)
+	{
+		this->a = a;
+		cout << "Parent::Parent(int a)" << endl;
+
+	}
+	~Parent()
+	{
+		cout << "~Parent()" << endl;
+	}
+
+private:
+	int a;
+};
+
+class Child :public Parent
+{
+public:
+	//子类继承于父类，父类中的成员变量应该用 父类的构造函数来初始化，使用初始化构造列表
+	Child(int a,int b):Parent(a)
+	{
+		this->b = b;
+		cout << "Child(int a,int b):Parent(a)" << endl;
+
+	}
+	~Child()
+	{
+		cout << "~Child()" << endl;
+	}
+
+	void printC()
+	{
+		Parent::printP();
+		cout << "Child::printc()" << endl;
+	}
+private:
+	int b;
+};
+
+int main()
+{
+	std::cout << "Hello World!\n"; 
+	test1();
+}
+
+Hello World!
+Parent::Parent(int a)
+Child(int a,int b):Parent(a)
+Parent::printP
+Child::printc()
+~Child()
+~Parent()
+```
+1. 子类对象在创建时会首先调用父类的构造函数
+2. 父类构造函数执行结束后，执行子类的构造函数
+3. 当父类的构造函数有参数时，需要在子类的初始化列表中显示调用
+4. 析构函数调用的先后顺序和 构造函数相反
+
+## 2.4 构造和组合并存，构造和析构原则
+* 先构造父类、再构造成员变量、最后构造自己
+* 先析构自己、再析构成员变量、最后析构父类
+
+```C++
+// 继承和组合并存，构造和析构原则.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
+//
+
+#include "pch.h"
+#include <iostream>
+using namespace std;
+
+class Object
+{
+public:
+	Object(const char*s)
+	{
+		cout << "Object(const char*s)" << " " << s << endl;
+	}
+	~Object()
+	{
+		cout << "~Object()" << endl;
+	}
+	int as;
+};
+
+class Parent :public Object
+{
+public:
+	Parent(const char *s):Object(s)
+	{
+		cout << "Parent(const char *s)" << endl;
+	}
+	~Parent()
+	{
+		cout << "~Parent()" << endl;
+	}
+};
+
+class Child :public Parent
+{
+public:
+	Child() :o2("o2"), o1("o1"), Parent("Parameter from Child")
+	{
+		cout << "Child()" << endl;
+	}
+	~Child()
+	{
+		cout << "~Child()" << endl;
+
+	}
+private:
+	Object o1;//这里是组合
+	Object o2;
+};
+
+void run()
+{
+	Child child;
+}
+
+int main()
+{
+	run();
+    std::cout << "Hello World!\n"; 
+}
+
+Object(const char*s) Parameter from Child
+Parent(const char *s)
+Object(const char*s) o1
+Object(const char*s) o2
+Child()
+~Child()
+~Object()
+~Object()
+~Parent()
+~Object()
+Hello World!
+```
+
+## 2.5 继承中同名变量处理方法
+1. 当子类成员变量与父类成员变量 **同名**时
+2. 子类依然从父类继承同名成员
+3. 当子类中通过作用域分辨符::进行同名成员区分(在派生类中使用基类的同名成员，显示地使用类名限定符)
+4. 同名成员存储在内存中的不同位置
+5. 基类成员的作用域延伸到所有派生类
+6. 派生类的同名成员屏蔽基类的同名成员
+![](picture/2019-05-04-21-21-08.png)
+```C++
+#include "pch.h"
+#include <iostream>
+class base
+{
+public:
+	int a, b;
+};
+class derived :public base
+{
+public:
+	int b, c;
+
+};
+void f()
+{
+	derived d;
+	d.a = 1;
+	d.base::b = 2;//同名成员变量和成员函数通过作用域分辨符区分
+	d.b = 3;
+	d.c = 4;
+}
+int main()
+{
+	std::cout << "Hello World!\n";
+	f();
+}
+```
+
+## 2.6 派生类中的static关键字
+* 基类定义的静态成员，将被所有派生类 **共享**
+* 根据静态成员自身的访问特性和派生类的继承方式，在类层次体系中具有不同的访问性质(遵循派生类的访问控制)
+* 派生类中访问静态成员，用一下形式显示说明：
+	类名::成员
+或通过对象访问
+	对象名.成员
+```C++
+// 派生类中的static关键字.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
+//
+
+#include "pch.h"
+#include <iostream>
+using namespace std;
+
+class A
+{
+public:
+	static int s;
+private:
+};
+
+int A::s = 0;//静态成员变量要在类的外部初始化
+
+class B :public A
+{
+public:
+private:
+
+};
+
+class C :protected B
+{
+public:
+
+};
+
+int main()
+{
+	B b;
+	cout << b.s << endl;//可以在B中访问s
+	B::s = 100;
+	cout << b.s << endl;
+	cout << A::s << endl;
+	//C::s = 300;不可访问
+
+    std::cout << "Hello World!\n"; 
+}
+```
+
+## 2.7 多继承
+
 
