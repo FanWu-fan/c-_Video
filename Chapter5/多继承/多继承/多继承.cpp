@@ -3,12 +3,17 @@
 
 #include "pch.h"
 #include <iostream>
+#include "Bed.h"
+#include "Sofa.h"
+#include "SofaBed.h"
+
 using namespace std;
 
 
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
+	SofaBed s;
+	s.sitandslepp();
 }
 
